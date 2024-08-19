@@ -31,7 +31,7 @@ For macOS, additional setup is required for GRUB2 and other dependencies. See th
 
 1. Compile the kernel:
    ```
-   zig build-exe kernel.zig -target i386-freestanding-none
+   zig build-exe kernel.zig -target x86-freestanding-none
    ```
 
 2. Create ISO directory structure:
