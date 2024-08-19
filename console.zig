@@ -1,3 +1,4 @@
+const std = @import("std");
 const fmt = @import("std").fmt;
 const mem = @import("std").mem;
 const Writer = @import("std").io.Writer;
@@ -107,4 +108,18 @@ fn callback(_: void, string: []const u8) error{}!usize {
 
 pub fn printf(comptime format: []const u8, args: anytype) void {
     fmt.format(writer, format, args) catch unreachable;
+}
+
+pub fn panic(msg: []const u8, error_return_trace: ?*std.builtin.StackTrace) noreturn {
+    @setCold(true);
+    setColors(.White, .Red);
+    clear();
+    printf("KERNEL PANIC: {s}\n", .{msg});
+    if (error_return_trace) |trace| {
+        printf("Stack trace:\n", .{});
+        std.debug.dumpStackTrace(trace.*);
+    }
+    while (true) {
+        asm volatile ("hlt");
+    }
 }

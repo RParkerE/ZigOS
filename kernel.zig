@@ -1,4 +1,7 @@
 const console = @import("console.zig");
+const idt = @import("idt.zig");
+const interrupts = @import("interrupts.zig");
+const pic = @import("pic.zig");
 
 /// Define constants for Multiboot header flags
 const ALIGN = 1 << 0; // Align to 4-byte boundary
@@ -23,13 +26,13 @@ export var multiboot align(4) linksection(".multiboot") = MultibootHeader{
 /// Uses naked calling convention and does not return
 export fn _start() callconv(.Naked) noreturn {
     asm volatile (
-    // Clear the base pointer register (EBP)
-        \\ xorl %%ebp, %%ebp
-        // Call the main function (_main)
-        \\ call main
-        // If main returns, trigger an undefined instruction exception to crash the program
-        \\ ud2
-    );
+        \\  mov $stack_top, %%esp
+        \\  call main
+        \\  cli
+        \\1:
+        \\  hlt
+        \\  jmp 1b
+        ::: "memory");
 }
 
 /// Main function of the program
@@ -39,4 +42,17 @@ pub export fn main() void {
     console.putString("Hello, world!");
     console.setForegroundColor(.LightRed);
     console.putChar('!');
+
+    // Initialize IDT
+    // TODO: FIGURE OUT WHY THIS BREAKS THE HEADER WHEN CALLED (NO MULTIBOOT HEADER FOUND WHEN UNCOMMENTED)
+    // interrupts.init();
+
+    // Enter an infinite loop to keep the kernel running
+    while (true) {
+        asm volatile ("hlt");
+    }
 }
+
+// Ensure we have a stack
+export var stack_bottom: [16 * 1024]u8 align(16) linksection(".bss") = undefined;
+export const stack_top = &stack_bottom[stack_bottom.len - 1];
