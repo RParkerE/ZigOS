@@ -44,8 +44,7 @@ pub export fn main() void {
     console.putChar('!');
 
     // Initialize IDT
-    // TODO: FIGURE OUT WHY THIS BREAKS THE HEADER WHEN CALLED (NO MULTIBOOT HEADER FOUND WHEN UNCOMMENTED)
-    // interrupts.init();
+    interrupts.init();
 
     // Enter an infinite loop to keep the kernel running
     while (true) {
