@@ -54,6 +54,10 @@ Run the kernel in QEMU:
 qemu-system-x86_64 -cdrom kernel.iso -debugcon stdio -vga virtio -m 4G -machine "q35" -no-reboot -no-shutdown
 ```
 
+![GRUB](https://github.com/user-attachments/assets/476b4fbc-86ae-480c-a41e-0d6418014c68)
+![Kernel](https://github.com/user-attachments/assets/9e7ae487-daaa-49b9-aa54-b8a327d9bb94)
+
+
 ## Next Steps
 
 - Add more kernel functionality
