@@ -3,6 +3,8 @@ const idt = @import("idt.zig");
 const interrupts = @import("interrupts.zig");
 const pic = @import("pic.zig");
 const pmm = @import("memory_manager.zig");
+const pit = @import("pit.zig");
+const keyboard = @import("keyboard.zig");
 
 /// Define constants for Multiboot header flags
 const ALIGN = 1 << 0; // Align to 4-byte boundary
@@ -44,11 +46,13 @@ pub export fn main() void {
     console.setForegroundColor(.LightRed);
     console.putChar('!');
 
-    // Initialize IDT
+    console.putString("\nInitializing interrupts...");
     interrupts.init();
+    console.putString(" Done.");
 
-    // Initialize the physical memory manager
+    console.putString("\nInitializing physical memory manager...");
     pmm.init();
+    console.putString(" Done.");
 
     console.putString("\nPhysical Memory Manager initialized");
 
@@ -59,9 +63,15 @@ pub export fn main() void {
         console.putString("\nFailed to allocate page");
     }
 
-    // Enter an infinite loop to keep the kernel running
+    console.putString("\nSystem initialized. Press keys to see them echo.\n");
+
+    var counter: u32 = 0;
     while (true) {
         asm volatile ("hlt");
+        counter += 1;
+        if (counter % 100 == 0) { // Assuming PIT is set to 100Hz
+            console.putChar('.');
+        }
     }
 }
 

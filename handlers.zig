@@ -2,6 +2,8 @@ const std = @import("std");
 const idt = @import("idt.zig");
 const console = @import("console.zig");
 const pic = @import("pic.zig");
+const pit = @import("pit.zig");
+const keyboard = @import("keyboard.zig");
 
 pub const InterruptStackFrame = extern struct {
     eip: u32,
@@ -150,6 +152,15 @@ fn haltSystem(message: []const u8) void {
     while (true) {} // Enter an infinite loop to halt the system.
 }
 
+export fn pitISR() callconv(.Interrupt) void {
+    pit.handler();
+}
+
+export fn keyboardISR() callconv(.Interrupt) void {
+    console.putString("\nKeyboard ISR called.\n");
+    keyboard.handler();
+}
+
 pub fn registerHandlers() void {
     const IDT_FLAGS = 0b1110; // Interrupt gate with DPL 0
 
@@ -172,6 +183,9 @@ pub fn registerHandlers() void {
     idt.setDescriptor(@intFromEnum(InterruptVector.MachineCheck), @intFromPtr(&machineCheckISR), 0x08, IDT_FLAGS);
     idt.setDescriptor(@intFromEnum(InterruptVector.SIMDError), @intFromPtr(&simdErrISR), 0x08, IDT_FLAGS);
     idt.setDescriptor(@intFromEnum(InterruptVector.SpuriousInterrupt), @intFromPtr(&spuriousIntISR), 0x08, IDT_FLAGS);
+
+    idt.setDescriptor(32, @intFromPtr(&pitISR), 0x08, IDT_FLAGS);
+    idt.setDescriptor(33, @intFromPtr(&keyboardISR), 0x08, IDT_FLAGS);
 
     // Load the IDT
     idt.load();
