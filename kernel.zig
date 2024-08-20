@@ -2,6 +2,7 @@ const console = @import("console.zig");
 const idt = @import("idt.zig");
 const interrupts = @import("interrupts.zig");
 const pic = @import("pic.zig");
+const pmm = @import("memory_manager.zig");
 
 /// Define constants for Multiboot header flags
 const ALIGN = 1 << 0; // Align to 4-byte boundary
@@ -37,14 +38,26 @@ export fn _start() callconv(.Naked) noreturn {
 
 /// Main function of the program
 pub export fn main() void {
-    console.setColors(.White, .Blue);
+    console.setColors(.Blue, .LightGray);
     console.clear();
-    console.putString("Hello, world!");
+    console.putString("Welcome To ZigOS");
     console.setForegroundColor(.LightRed);
     console.putChar('!');
 
     // Initialize IDT
     interrupts.init();
+
+    // Initialize the physical memory manager
+    pmm.init();
+
+    console.putString("\nPhysical Memory Manager initialized");
+
+    // Example usage of the physical memory manager
+    if (pmm.allocate_page()) |page| {
+        console.printf("\nAllocated page at address: 0x{X:0>16}", .{@intFromPtr(&page)});
+    } else {
+        console.putString("\nFailed to allocate page");
+    }
 
     // Enter an infinite loop to keep the kernel running
     while (true) {
